@@ -1,0 +1,187 @@
+{# https://tedboy.github.io/jinja2/off_doc.templates.html #}
+{# This is a template comment #}
+{# 
+    This template comment
+    is multiline
+#}
+# This is not a template comment #
+
+--------------------------------------------------
+# Context attributes
+{{ self._TemplateReference__context }}
+
+--------------------------------------------------
+# Variable samples
+String: {{ String }}
+Mapping: {{ Mapping.map_key }}
+Default String: {{ undefined_var|default("default_value") }}
+
+--------------------------------------------------
+# If samples
+{% if undefined_var %} 
+This var is undefined
+{% elif defined_var %}
+This var is {{ defined_var }}
+{% else %} 
+error
+{% endif %}
+
+--------------------------------------------------
+{# The '-' at the end removes indent/newline #}
+# Start indent samples
+{% if defined_var %} 
+    This is indented and has a new line above and below
+{% endif %}
+----------
+{% if defined_var -%} 
+    This is not indented and doesn't have a new line above and below
+{%- endif %}
+----------
+{%- if defined_var %} 
+    This is indented and doesn't have a new line above and below
+{%- endif %}
+----------
+{%- if defined_var %} 
+    {%- if defined_var %} 
+        This is double indented and doesn't have a new line above and below
+    {%- endif %}
+    ----------
+    {% if defined_var -%} 
+        This is single indented and doesn't have a new line above and below
+    {%- endif %}
+{%- endif %}
+# End indent samples
+
+--------------------------------------------------
+# Loops
+{% for item in Sequence %}
+{%- if loop.first %} 
+Current iteration (1 indexed): {{ loop.index }}
+Current iteration (0 indexed): {{ loop.index0 }}
+Number of iterations from the end of the loop (1 indexed): {{ loop.revindex }}
+Number of iterations from the end of the loop (0 indexed): {{ loop.revindex0 }}
+True if first iteration: {{ loop.first }}
+True if last iteration: {{ loop.last }}
+number of items: {{ loop.length }}
+Function to cycle between a list of sequences{{ loop.cycle }}
+Current rendering recursive loop depth(Starts at level 1): {{ loop.depth }}
+Current rendering recursive loop depth(Starts at level 0): {{ loop.depth0 }}
+{%- endif %}
+Sequence Index: {{ loop.index }}, Item: {{ item }}
+{%- endfor %}
+
+# Nested Loop
+{% for name,list in Nested_sequence.items() %}
+Listname: {{name}}
+    {%- for line in list %}
+    {{ line }}
+    {%- endfor %}
+{% endfor -%}
+
+--------------------------------------------------
+# Global variables
+{#
+    variables are reinitialized at every iteration of a loop.
+    Jinja2 namespaces can be used to have a global variable
+#}
+
+{% for name,list in Nested_sequence.items() %}
+{% set count = namespace(value=0) %}
+Listname: {{name}}
+    {%- for line in list %}
+    {{ line }}
+    {% set count.value = count.value + 10 %}
+    {{ count.value }} {{ line }}
+    {%- endfor %}
+{% endfor -%}
+
+--------------------------------------------------
+# String/Iterable/Sequence/Mapping check
+Is a string?
+{% if String is string %}--> String is string{% endif %}
+{% if Sequence is string %}--> Sequence is string{% endif %}
+{% if Mapping is string %}--> Mapping is string{% endif %}
+
+Is iterable?
+{% if String is iterable %}--> String is iterable{% endif %}
+{% if Sequence is iterable %}--> Sequence is iterable{% endif %}
+{% if Mapping is iterable %}--> Mapping is iterable{% endif %}
+
+Is sequence?
+{% if String is sequence %}--> String is sequence{% endif %}
+{% if Sequence is sequence %}--> Sequence is sequence{% endif %}
+{% if Mapping is sequence %}--> Mapping is sequence{% endif %}
+
+Is mapping?
+{% if String is mapping %}--> String is mapping{% endif %}
+{% if Sequence is mapping %}--> Sequence is mapping{% endif %}
+{% if Mapping is mapping %}--> Mapping is mapping{% endif %}
+
+--------------------------------------------------
+# Dictionary handling
+# Dict Keys
+{{ Mapping.keys() }}
+# Specific Dict entry
+{{ Mapping.map_key_1}}
+{{ Mapping["map_key_1"]}}
+# Dict length
+{{ Mapping|length }}
+# Sorted Dict
+{{ Mapping|dictsort }}
+# Dict to list
+{{ Mapping.keys()|join(",") }}
+# Dict to sorted list
+{{ Mapping|sort|join(",") }}
+# Dict Key/Value
+{% for mapping_key,mapping_value in Mapping.items() -%}
+Key: {{ mapping_key }}, Value: {{ mapping_value }}
+{% endfor %}
+# Dict sorted Key/Value
+{% for mapping_key,mapping_value in Mapping|dictsort -%}
+Key: {{ mapping_key }}, Value: {{ mapping_value }}
+{% endfor %}
+
+--------------------------------------------------
+# Macros
+{% macro Macro_name(some_name,mask) -%}
+  Value: {{ some_name.key_1 }} Mask_value: {{ mask|default(some_name.mask)|default('default_value') }}
+{%- endmacro -%}
+
+{{ Macro_name(Macro_dict_1,'non_default_value') }}
+{{ Macro_name(Macro_dict_2) }}
+{{ Macro_name(Macro_dict_3['some_dict']) }}
+
+--------------------------------------------------
+# Import/Include
+{% import './includes/imported_file.j2' as imported_file -%}
+{% include './includes/included_file.j2' %}
+
+Imported:
+{{ imported_file.Macro_name(Macro_dict_1) }}
+
+--------------------------------------------------
+# String slicing
+Slicing sample {{ slicing_sample_1 }}
+{%- if slicing_sample_1.find('.') > 0 %}
+    After first dot: {{ slicing_sample_1.partition('.')[2] }}
+{%- endif -%}
+{% set host = slicing_sample_1.partition('.')[0] -%}
+{% set number  = host.partition('-')[2] | int -%}
+{% if number %}
+    Incresed sliced number: {{ 10 + number }}
+{%- endif %} 
+
+Slicing sample: {{ slicing_sample_2 }}
+{%- set dot = slicing_sample_2.find('.') -%}
+{% if dot > 0 %}
+    No dot found in slicing_sample_2 at position {{ dot }}
+    After first dot: {{ slicing_sample_2[dot+1:] }}
+    {% set slicing_sample_2 = slicing_sample_2[:dot] -%}
+{%- endif -%}
+{% set dash = slicing_sample_2.find('-') -%}
+{% if dash > 0 -%}
+    {% set number = slicing_sample_2[dash+1:] | int -%}
+    Incresed sliced number: {{ 10 + number }}
+{%- endif %}
+
+--------------------------------------------------

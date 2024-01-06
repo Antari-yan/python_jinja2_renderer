@@ -1,0 +1,3 @@
+{% macro Macro_name(some_name,mask) -%}
+  Value: {{some_name.key_1}} Mask_value: {{mask|default(some_name.mask)|default('default_value')}}
+{%- endmacro -%}
